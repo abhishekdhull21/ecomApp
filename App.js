@@ -6,26 +6,25 @@
  */
 
 import React from 'react';
-import {createDrawerNavigator} from '@react-navigation/drawer';
-import {NavigationContainer} from '@react-navigation/native';
-import LeftSideMenu from './src/component/LeftSideMenu';
+// import {createDrawerNavigator} from '@react-navigation/drawer';
+// import {NavigationContainer} from '@react-navigation/native';
+// import LeftSideMenu from './src/component/LeftSideMenu';
 import {Text} from '@rneui/themed';
-import {View} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-const Drawer = createDrawerNavigator();
+import HomeScreen from './src/screen/HomeScreen';
+import screens from './src/screen'
+import Login from './src/screen/Login';
+const Stack = createNativeStackNavigator();
 
 const App = () => (
-  // <NavigationContainer>
-  //   <Drawer.Navigator
-  //     drawerContent={() => <LeftSideMenu />}
-  //     edgeWidth={200} // Adjust the edge width for touch sensitivity
-  //   >
-      <View>
-        <Text>Hello world</Text>
-      </View>
-      // {/* Your app screens */}
-  //   </Drawer.Navigator>
-  // </NavigationContainer>
+  <NavigationContainer>
+  <Stack.Navigator initialRouteName={screens.HOME_SCREEN} screenOptions={{headerShown:false}}>
+    <Stack.Screen name={screens.LOGIN_SCREEN} component={Login} />
+    <Stack.Screen name={screens.HOME_SCREEN} component={HomeScreen} />
+  </Stack.Navigator>
+</NavigationContainer>
 );
 
 export default App;

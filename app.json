@@ -1,4 +1,17 @@
 {
   "name": "EcomApp",
-  "displayName": "EcomApp"
+  "displayName": "EcomApp",
+  "color":{
+    "primary":"#27374D",
+    "secondary":"#526D82",
+    "trinary":"#9DB2BF",
+    "fourth":"#DDE6ED",
+    "background":"#ffffff",
+    "primaryText":"#ffffff",
+    "shadow":"rgba(0,0,0,0.6)"
+  },
+  "zIndex":{
+    "topHeader":100000,
+    "sidebarItems": 10000
+  }
 }
