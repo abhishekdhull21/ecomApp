@@ -1,22 +1,24 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, TouchableHighlight,TouchableOpacity, Alert } from 'react-native';
+import Screens from '../screen';
 
-const Table = ({ data = [], row, col=3, tableStyle, rowStyle, colStyle, cellStyle}) => {
+const Table = ({ data = [], tableStyle, rowStyle, colStyle, cellStyle, navigation, onPress}) => {
   const Col = ({data}) =>{
     return (
-      <View style={{ ...styles.column, ...colStyle }}>
-        <TouchableHighlight style={styles.container}>
-        <Text style={{...styles.cell,...cellStyle}}>{data}</Text>
-      </TouchableHighlight>
+      <View style={{ ...styles.column, ...colStyle }} >
+        <TouchableOpacity style={{...styles.cell,...cellStyle}} onPress={()=>{
+          navigation?.navigate(Screens.PRODUCTS_SCREEN)}}>
+        <Text>{data}</Text>
+      </TouchableOpacity>
       </View>
     )
   }
   return (
-    <View style={{ ...styles.table, ...tableStyle }}>
+    <View style={{ ...styles.table, ...tableStyle }} onPress={onPress}>
       {data.map((rowData, i) =>
       (<View key={i} style={{ ...styles.row, ...rowStyle }}>
-        {Array.isArray(rowData) && rowData.map(cellData =>
-          <Col data={cellData} />
+        {Array.isArray(rowData) && rowData.map((cellData,index) =>
+          <Col key={index} data={cellData} />
         )}
       </View>)
       )}

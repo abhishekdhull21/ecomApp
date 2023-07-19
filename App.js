@@ -16,6 +16,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/screen/HomeScreen';
 import screens from './src/screen'
 import Login from './src/screen/Login';
+import Products from './src/screen/Products';
+import Cart from './src/screen/Cart';
 const Stack = createNativeStackNavigator();
 
 const App = () => (
@@ -23,6 +25,8 @@ const App = () => (
   <Stack.Navigator initialRouteName={screens.HOME_SCREEN} screenOptions={{headerShown:false}}>
     <Stack.Screen name={screens.LOGIN_SCREEN} component={Login} />
     <Stack.Screen name={screens.HOME_SCREEN} component={HomeScreen} />
+    <Stack.Screen name={screens.PRODUCTS_SCREEN} component={Products} />
+    <Stack.Screen name={screens.CART_SCREEN} component={Cart} />
   </Stack.Navigator>
 </NavigationContainer>
 );

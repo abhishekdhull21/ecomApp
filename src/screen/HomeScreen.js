@@ -4,7 +4,7 @@ import { SearchBar } from '@rneui/themed';
 import TopHeader from '../component/TopHeader';
 import app from '../../app.json'
 import Category from '../component/Category';
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
     return (
         <View style={styles.main}>
             <TopHeader />
@@ -13,7 +13,8 @@ const HomeScreen = () => {
     //   onChangeText={}
     //   value={search}
     /> */}
-        <Category></Category>
+    
+        <Category navigation={navigation} ></Category>
         </View>
     )
 }

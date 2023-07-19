@@ -19,6 +19,7 @@ const MEASUREMENTS = {
     HEADER_HEIGHT:70
 }
 const TopHeader = (props) => {
+    const {menuComponent} = props;
     const [menu, setMenu] = useState({})
 
     const Item = ({title,subTitle}) => {
@@ -48,6 +49,13 @@ const TopHeader = (props) => {
                 <View>
                     <Text style={styles.title}>{props.title || app.displayName}</Text>
                 </View>
+                {/* <View> */}
+                    {/* <Text style={styles.title}>{props.title || app.displayName}</Text> */}
+                {Array.isArray(menuComponent) && menuComponent.map((Comp) =>{
+                    console.log('menu componenpt',  Comp)
+                return Comp
+                })}
+                {/* </View> */}
                 <View>
                     <Icon
                         name="menu"
@@ -59,9 +67,9 @@ const TopHeader = (props) => {
                 </View>
             </View>
 
-            <View style={{ ...styles.sidebar, justifyContent: !menu[HeaderType.PROFILE] && menu[HeaderType.MENU] ? 'flex-end' : 'space-between' }}>
+            <View style={{ ...styles.sidebar, height:menu[HeaderType.PROFILE] || menu[HeaderType.MENU] ? '90%' : '0', justifyContent: !menu[HeaderType.PROFILE] && menu[HeaderType.MENU] ? 'flex-end' : 'space-between' }}>
                 {menu[HeaderType.PROFILE] &&
-      <View style={styles.sidebarItem}>
+                    <View style={styles.sidebarItem}>
                         <Profile />
                     </View>
                 }
@@ -104,7 +112,7 @@ const styles = StyleSheet.create({
         top: MEASUREMENTS.HEADER_HEIGHT, 
         left: '0', 
         width: '100%',
-        height: '90%',
+        // height: '90%',
         zIndex: 1,
         flex: 1,
         flexDirection: 'row',
@@ -113,10 +121,9 @@ const styles = StyleSheet.create({
 
     },
     sidebarItem: {
-        paddingTop: '100px',
+        // paddingTop: '100px',
         width: '60%',
         height: '90%',
-       
         backgroundColor: app.color.background,
         zIndex: app.zIndex.sidebarItems,
         shadowOffset: {width: 2, height: 8},  
