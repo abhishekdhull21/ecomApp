@@ -4,6 +4,7 @@ import { SearchBar } from '@rneui/themed';
 import TopHeader from '../component/TopHeader';
 import app from '../../app.json'
 import Category from '../component/Category';
+import OrderList from '../component/OrderList';
 const HomeScreen = ({navigation}) => {
     return (
         <View style={styles.main}>
@@ -13,8 +14,8 @@ const HomeScreen = ({navigation}) => {
     //   onChangeText={}
     //   value={search}
     /> */}
-    
-        <Category navigation={navigation} ></Category>
+            <OrderList />
+        {/* <Category navigation={navigation} ></Category> */}
         </View>
     )
 }
