@@ -5,6 +5,7 @@ import TopHeader from '../component/TopHeader';
 import app from '../../app.json'
 import Category from '../component/Category';
 import OrderList from '../component/OrderList';
+import OrderDetailScreen from './OrderDetailScreen';
 const HomeScreen = ({navigation}) => {
     return (
         <View style={styles.main}>
@@ -14,8 +15,9 @@ const HomeScreen = ({navigation}) => {
     //   onChangeText={}
     //   value={search}
     /> */}
-            <OrderList />
-        {/* <Category navigation={navigation} ></Category> */}
+            {/* <OrderList /> */}
+            {/* <OrderDetailScreen /> */}
+        <Category navigation={navigation} ></Category>
         </View>
     )
 }

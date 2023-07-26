@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, FlatList, Alert, Dimensions } from 'react-native';
 import { Icon, Button, Badge, Input, Card } from '@rneui/themed';
 import DropDownPicker from 'react-native-dropdown-picker';
+import Screens from '.';
+import { useNavigation } from '@react-navigation/native';
 
 const renderPaymentOptions = [
   { label: 'Cash', value: 'cash' },
@@ -36,7 +38,7 @@ const Cart = () => {
   const [discount, setDiscount] = useState('');
   const [paymentType, setPaymentType] = useState(renderPaymentOptions[0]);
   const [openDropdown, setOpenDropdown] = useState(false)
-
+const navigation = useNavigation();
 
   
   const addToCart = (product) => {
@@ -123,25 +125,14 @@ const Cart = () => {
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
           />
-            {/* <View style={styles.totalContainer}>
-              <Text style={styles.totalText}>Total Amount: ${calculateTotalAmount()}</Text>
-              <View style={styles.discountContainer}>
-                <Input
-                  placeholder="Enter discount amount"
-                  keyboardType="numeric"
-                  value={discount}
-                  onChangeText={setDiscount}
-                  containerStyle={[styles.discountInputContainer, { width: inputContainerWidth }]}
-                  inputStyle={styles.discountInput}
-                />
-                <Text style={styles.discountLabel}>Discount:</Text>
-              </View>
-              <Text style={styles.finalTotalText}>Final Total: ${calculateFinalTotal()}</Text>
-            </View> */}
             <Card containerStyle={styles.cardContainer}>
             <View style={styles.row}>
               <Text style={styles.label}>Total Amount:</Text>
               <Text style={styles.amount}>${calculateTotalAmount()}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Customer:</Text>
+              <Button title={'Select'} />
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Discount:</Text>
@@ -168,6 +159,10 @@ const Cart = () => {
             <View style={styles.row}>
               <Text style={styles.label}>Final Total:</Text>
               <Text style={styles.finalTotalAmount}>${calculateFinalTotal()}</Text>
+            </View>
+
+            <View style={{}}>
+              <Button style={styles.btnProceed} title={'Proceed'} onPress={() => navigation.navigate(Screens.ORDER_DETAIL_SCREEN)} /> 
             </View>
 
           </Card>
@@ -309,6 +304,11 @@ const styles = StyleSheet.create({
     elevation: 2, // For Android shadow
     zIndex: 1000, // To make sure dropdown is rendered above other components
   },
+
+  btnProceed:{
+    width:'100%',
+    elevation:4,
+  }
 });
 
 export default Cart;

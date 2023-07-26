@@ -1,6 +1,9 @@
+import { useNavigation } from '@react-navigation/native';
+import { Button } from '@rneui/themed';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import Collapsible from 'react-native-collapsible';
+import Screens from '../screen';
 
 
 
@@ -17,7 +20,6 @@ const DATA = [
     amount: 150,
     products: ['Product C', 'Product D'],
   },
-  // Add more order data as needed
 ];
 
 const FILTER_OPTIONS = [
@@ -34,6 +36,9 @@ const OrderList = () => {
   const [selectedFilter, setSelectedFilter] = useState('Today');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orders, setOrders] = useState(DATA);
+  const [activeOrderDropdown, setActiveOrderDropdown] = useState(0);
+
+  const navigation  = useNavigation()
 
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
@@ -41,7 +46,8 @@ const OrderList = () => {
     // For simplicity, we'll just display all orders in this example.
   };
 
-  const handleOrderSelect = (orderId) => {
+  const handleOrderSelect = (orderId,index) => {
+    setActiveOrderDropdown(prev => index === prev ? -1 : index)
     setSelectedOrder(selectedOrder === orderId ? null : orderId);
   };
 
@@ -64,35 +70,6 @@ const OrderList = () => {
     </TouchableOpacity>
   );
 
-  const renderOrderItem = ({ item }) => (
-    <Collapsible collapsed={!selectedOrder}>
-    {accordionSections.map(({ title, content }) => (
-      <View key={title}>
-        <TouchableOpacity onPress={() => handleOrderSelect(title)}>
-          <View style={styles.orderItem}>
-            <Text style={styles.orderDate}>{orders.find((order) => order.id === title)?.date}</Text>
-            <Text style={styles.orderAmount}>
-              Amount: ${orders.find((order) => order.id === title)?.amount}
-            </Text>
-          </View>
-        </TouchableOpacity>
-        {content}
-      </View>
-    ))}
-  </Collapsible>
-    // <TouchableOpacity onPress={() => handleOrderSelect(item.id)}>
-    //   <View style={styles.orderItem}>
-    //     <Text style={styles.orderDate}>{item.date}</Text>
-    //     <Text style={styles.orderAmount}>Amount: ${item.amount}</Text>
-    //   </View>
-    // </TouchableOpacity>
-  );
-
-  const renderProductItem = ({ item }) => (
-    <View style={styles.productItem}>
-      <Text style={styles.productName}>{item}</Text>
-    </View>
-  );
 
   const accordionSections = orders.map((order) => ({
     title: order.id,
@@ -109,7 +86,6 @@ const OrderList = () => {
 
   return (
     <View style={styles.container}>
-      {/* Filter options */}
       <FlatList
         horizontal
         style={{maxHeight:75}}
@@ -119,30 +95,29 @@ const OrderList = () => {
         contentContainerStyle={styles.filterContainer}
         showsHorizontalScrollIndicator={false}
       />
-
-      {/* List of orders */}
-      <FlatList
-        data={orders}
-        renderItem={renderOrderItem}
-        keyExtractor={(item) => item.id}
-      />
-
-      {/* Collapsible section with products */}
-      {/* <Collapsible collapsed={false}>
-        {accordionSections.map(({ title, content }) => (
-          <View key={title}>
-            <TouchableOpacity onPress={() => handleOrderSelect(title)}>
-              <View style={styles.orderItem}>
-                <Text style={styles.orderDate}>{orders.find((order) => order.id === title)?.date}</Text>
-                <Text style={styles.orderAmount}>
-                  Amount: ${orders.find((order) => order.id === title)?.amount}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            {content}
+      
+      {accordionSections.map(({ title, content }, index) => (
+        <>
+         <TouchableOpacity onPress={() => handleOrderSelect(title,index)}>
+          <View style={styles.orderItem}>
+            <Text style={styles.orderDate}>{orders.find((order) => order.id === title)?.date}</Text>
+            <Text style={styles.orderAmount}>
+              Amount: ${orders.find((order) => order.id === title)?.amount}
+            </Text>
           </View>
-        ))}
-      </Collapsible> */}
+        </TouchableOpacity>
+          <Collapsible collapsed={activeOrderDropdown !== index}>
+            <View key={title}>
+              {content}
+              <TouchableOpacity onPress={() => handleOrderSelect(title,index)}>
+          <View style={styles.orderItem}>
+              <Button onPress={() => navigation.navigate(Screens.CART_SCREEN) } >View</Button>
+          </View>
+        </TouchableOpacity>
+            </View>
+          </Collapsible>
+        </>
+      ))}
     </View>
   );
 };

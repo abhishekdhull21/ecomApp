@@ -14,10 +14,13 @@ const Profile = () => {
           containerStyle={{ backgroundColor: '#eb1561' }}
         />
         <View style={styles.avatarTitleSection}>
-            <Text style={{color:app.color.primary, fontSize:30}}>Abhishek Singh</Text>
+            <Text style={{color:app.color.primary, fontSize:26}}>Abhishek Singh</Text>
             <Text  style={{color:app.color.secondary, fontSize:24}}>Desk</Text>
         </View>
         </View>
+        <Divider width={2} color={app.color.secondary} />
+        <Text style={{color:app.color.primary, fontSize:18, marginVertical:8, paddingStart:12}}>Customers</Text>
+
         <Divider width={2} color={app.color.secondary} />
         <View style={styles.analytics}>
             <SellerCard />

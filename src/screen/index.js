@@ -6,6 +6,7 @@ const Screens = {
     LOGIN_SCREEN:"LoginScreen",
     PRODUCTS_SCREEN:"ProductsScreen",
     CART_SCREEN:"CartScreen",
+    ORDER_DETAIL_SCREEN:'OrderDetailScreen'
 }
 
 export default Screens
