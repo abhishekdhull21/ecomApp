@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, TextInput } from 'react-native';
 import { Card, Button, Icon } from '@rneui/themed';
+const _ = require('lodash');
 
-const ProductCard = () => {
-  const [quantity, setQuantity] = useState(2);
+const ProductCard = ({product,cartItems,setCartItems}) => {
+  const [quantity, setQuantity] = useState(cartItems.find(item => item._id === product._id)?.quantity || 1);
   const [isInCart, setIsInCart] = useState(false);
 
   const handleIncrement = () => {
@@ -25,24 +26,40 @@ const ProductCard = () => {
 
   const handleCartAction = () => {
     if (isInCart) {
-      console.log('Remove from Cart pressed');
+      setCartItems(prev => prev.filter(item => item._id !== product._id));
     } else {
-      console.log('Add to Cart pressed');
+      setCartItems(prev => [...prev,{...product, quantity:quantity}]);
     }
-    setIsInCart(!isInCart);
+    // setIsInCart(!isInCart);
+    
   };
 
-  const cartButtonTitle = isInCart ? 'Remove' : 'Add';
 
+  React.useEffect(() => {
+    setIsInCart(cartItems.some(item => item._id === product._id));
+
+    setQuantity(cartItems.find(item => item._id === product._id)?.quantity || 1)
+  },[cartItems])
+
+  React.useEffect(() => {
+   let productIndex =  cartItems.findIndex(item => item._id === product._id);
+   let cartItemsClone = _.cloneDeep(cartItems);
+   if(productIndex > -1 && product?.quantity !== quantity){
+    cartItemsClone[productIndex] = {...cartItemsClone[productIndex], quantity};
+    setCartItems(cartItemsClone);
+   }
+  },[quantity])
+
+  const cartButtonTitle = isInCart ? 'Remove' : 'Add';
   return (
     <Card containerStyle={styles.cardContainer}>
       {/* <Card.Image source={require('path_to_image')} style={styles.cardImage} /> */}
-      <Card.Title style={styles.cardTitle}>A product full name be here</Card.Title>
+      <Card.Title style={styles.cardTitle}>{product?.name}</Card.Title>
       <Card.Divider style={styles.divider} />
       <View style={styles.cardContent}>
         <View style={styles.priceContainer}>
           <Icon name="currency-inr" type="material-community" size={18} />
-          <Card.FeaturedSubtitle style={styles.price}>99.99</Card.FeaturedSubtitle>
+          <Card.FeaturedSubtitle style={styles.price}>{product?.price || 0}</Card.FeaturedSubtitle>
         </View>
         <View style={styles.quantityContainer}>
           <Button

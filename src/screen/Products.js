@@ -4,29 +4,13 @@ import ProductCard from '../component/ProductCard';
 import CartBottomSheet from '../component/CartBottomsheet';
 import TopHeader from '../component/TopHeader';
 import { Icon } from '@rneui/themed';
+import { useRoute } from '@react-navigation/native';
 const Products = () => {
-    const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(true);
-    const [cartItems, setCartItems] = useState([
-        { id: 1, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        { id: 2, name: 'Product 2', price: 29.99, quantity:1 },
-        { id: 13, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        { id: 21, name: 'Product 2', price: 29.99, quantity:1 },
-        // { id: 11, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        // { id: 22, name: 'Product 2', price: 29.99, quantity:1 },
-        // { id: 14, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        // { id: 24, name: 'Product 2', price: 29.99, quantity:1 },
-        // { id: 15, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        // { id: 25, name: 'Product 2', price: 29.99, quantity:1 },
-        // { id: 52, name: 'Product 2', price: 29.99, quantity:1 },
-        // { id: 113, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        // { id: 121, name: 'Product 2', price: 29.99, quantity:1 },
-        // { id: 111, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        // { id: 122, name: 'Product 2', price: 29.99, quantity:1 },
-        // { id: 114, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        // { id: 124, name: 'Product 2', price: 29.99, quantity:1 },
-        // { id: 115, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-        // { id: 125, name: 'Product 2', price: 29.99, quantity:1 },
-    ]);
+    const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+    const [products, setProducts] = useState([]);
+    const route = useRoute();
+    const category = route.params.category;
+    const [cartItems, setCartItems] = useState([]);
 
     const handleOpenBottomSheet = () => {
         setIsBottomSheetVisible(true);
@@ -35,6 +19,16 @@ const Products = () => {
     const handleCloseBottomSheet = () => {
         setIsBottomSheetVisible(false);
     };
+
+    const fetchProducts = async() => {
+      let data =   await request('products?category='+category,{method: 'GET'});
+      setProducts(data);
+    }
+
+    React.useEffect(() => {
+        fetchProducts();
+    },[])
+
     return (
         <>
             <TopHeader menuComponent={
@@ -49,12 +43,12 @@ const Products = () => {
             <ScrollView>
                 <View style={styles.container}>
                     <View style={styles.row}>
-                        {[0, 1, 2, 30, 1, 2, 30, 1, 2, 30, 1, 2, 30, 1, 2, 30, 1, 2, 30, 1, 2, 3].map(() => (
-                            <ProductCard />
+                        {products.map((product) => (
+                            <ProductCard product={product} cartItems={cartItems} setCartItems={setCartItems} />
                         ))}
                     </View>
                 </View>
-                <Button title="Open Cart" onPress={handleOpenBottomSheet} />
+                {/* <Button title="Open Cart" onPress={handleOpenBottomSheet} /> */}
                 <CartBottomSheet visible={isBottomSheetVisible} onDismiss={handleCloseBottomSheet} cartItems={cartItems} setCartItems={setCartItems} />
             </ScrollView>
         </>

@@ -20,7 +20,7 @@ import Products from './src/screen/Products';
 import Cart from './src/screen/Cart';
 import OrderDetailScreen from './src/screen/OrderDetailScreen';
 import AppContext from './src/context/AppContext';
-import CustomerCreatePopup from './src/component/CustomerCreatePopup';
+// import CustomerCreatePopup from './src/component/CustomerCreatePopup';
 const Stack = createNativeStackNavigator();
 
 const App = () => {
@@ -30,9 +30,9 @@ const App = () => {
   };
   return(
     <>
-  <AppContext.Provider value={{isCustomerPopupVisible, toggleCustomerPopup }} >
+  {/* <AppContext.Provider value={{isCustomerPopupVisible, toggleCustomerPopup }} > */}
   <NavigationContainer>
-  <Stack.Navigator initialRouteName={screens.HOME_SCREEN} screenOptions={{headerShown:false}}>
+  <Stack.Navigator initialRouteName={screens.LOGIN_SCREEN} screenOptions={{headerShown:false}}>
     <Stack.Screen name={screens.LOGIN_SCREEN} component={Login} />
     <Stack.Screen name={screens.HOME_SCREEN} component={HomeScreen} />
     <Stack.Screen name={screens.PRODUCTS_SCREEN} component={Products} />
@@ -40,8 +40,8 @@ const App = () => {
     <Stack.Screen name={screens.ORDER_DETAIL_SCREEN} component={OrderDetailScreen} />
   </Stack.Navigator>
 </NavigationContainer>
-</AppContext.Provider>
-<Overlay  isVisible={isCustomerPopupVisible} onBackdropPress={toggleCustomerPopup}>
+{/* </AppContext.Provider> */}
+{/* <Overlay  isVisible={isCustomerPopupVisible} onBackdropPress={toggleCustomerPopup}>
         <CustomerCreatePopup
           onClose={toggleCustomerPopup}
           onCreateCustomer={(customerData) => {
@@ -49,7 +49,7 @@ const App = () => {
             console.log('New Customer Data:', customerData);
           }}
         />
-</Overlay>
+</Overlay> */}
 
 </>
 )};

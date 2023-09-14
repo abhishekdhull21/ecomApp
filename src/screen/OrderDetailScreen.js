@@ -162,7 +162,6 @@ const OrderDetailScreen = () => {
 
     const pdfFile = await RNHTMLtoPDF.convert(options);
     const pdfPath = pdfFile.filePath;
-    console.log('PDF Path:', pdfPath);
   };
 
   return (

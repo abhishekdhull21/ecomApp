@@ -56,7 +56,6 @@ const TopHeader = (props) => {
                 {/* <View> */}
                 {/* <Text style={styles.title}>{props.title || app.displayName}</Text> */}
                 {Array.isArray(menuComponent) && menuComponent.map((Comp) => {
-                    console.log('menu componenpt', Comp)
                     return Comp
                 })}
                 {/* </View> */}

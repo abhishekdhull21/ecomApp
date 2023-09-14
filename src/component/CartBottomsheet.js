@@ -16,7 +16,7 @@ const CartBottomSheet = ({ visible, onDismiss, cartItems, setCartItems }) => {
     }
 
     const removeFromCart = (productId) => {
-        setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+        setCartItems((prevItems) => prevItems.filter((item) => item._id !== productId));
     };
 
     const updateQuantity = (productId, newQuantity) => {
@@ -24,7 +24,7 @@ const CartBottomSheet = ({ visible, onDismiss, cartItems, setCartItems }) => {
         if (newQuantity > 0) {
             setCartItems((prevItems) =>
                 prevItems.map((item) =>
-                    item.id === productId ? { ...item, quantity: newQuantity } : item
+                    item._id === productId ? { ...item, quantity: newQuantity } : item
                 )
             );
         } else {
@@ -33,28 +33,28 @@ const CartBottomSheet = ({ visible, onDismiss, cartItems, setCartItems }) => {
         }
     };
 
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item: product }) => (
         <View style={styles.itemContainer}>
-            <Text numberOfLines={1} ellipsizeMode="middle" style={{width:150}}>{item.name}</Text>
+            <Text numberOfLines={1} ellipsizeMode="middle" style={{width:150}}>{product.name}</Text>
             <View style={styles.quantityContainer}>
                 <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={() => updateQuantity(item.id, item.quantity - 1)}
+                    onPress={() => updateQuantity(product._id, product.quantity - 1)}
                 >
                     <Icon name="remove" size={18} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.quantityText}>{item.quantity}</Text>
+                <Text style={styles.quantityText}>{product.quantity}</Text>
                 <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={() => updateQuantity(item.id, item.quantity + 1)}
+                    onPress={() => updateQuantity(product._id, product.quantity + 1)}
                 >
                     <Icon name="add" size={18} color="black" />
                 </TouchableOpacity>
             </View>
-            <Text>${item.price * item.quantity}</Text>
+            <Text><Icon name="currency-inr" type="material-community" size={13} />{(product.price * product.quantity).toFixed(2)}</Text>
             <TouchableOpacity
                 style={styles.removeButton}
-                onPress={() => removeFromCart(item.id)}
+                onPress={() => removeFromCart(product._id)}
             >
                 <Icon name="remove-shopping-cart" size={18} color="white" />
             </TouchableOpacity>
@@ -80,11 +80,11 @@ const CartBottomSheet = ({ visible, onDismiss, cartItems, setCartItems }) => {
                         <FlatList
                             style={styles.flatList}
                             data={cartItems}
-                            keyExtractor={(item) => item.id.toString()}
+                            keyExtractor={(item) => item._id.toString()}
                             renderItem={renderItem}
                         />
                         <View style={styles.totalContainer}>
-                            <Text style={styles.totalText}>Total Amount: ${calculateTotalAmount()}</Text>
+                            <Text style={styles.totalText}>Total Amount:<Icon name="currency-inr" type="material-community" size={16} />{calculateTotalAmount()}</Text>
                         </View>
                         <View style={styles.buttonsContainer}>
                             <TouchableOpacity style={styles.closeButton} onPress={onDismiss}>
