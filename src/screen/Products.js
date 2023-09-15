@@ -5,6 +5,7 @@ import CartBottomSheet from '../component/CartBottomsheet';
 import TopHeader from '../component/TopHeader';
 import { Icon } from '@rneui/themed';
 import { useRoute } from '@react-navigation/native';
+import request from '../utils/request';
 const Products = () => {
     const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
     const [products, setProducts] = useState([]);
@@ -22,11 +23,25 @@ const Products = () => {
 
     const fetchProducts = async() => {
       let data =   await request('products?category='+category,{method: 'GET'});
-      setProducts(data);
+
+      data && setProducts(data);
+    }
+
+    const fetchCart = async() => {
+        let data = await request('carts',{method: 'GET'});
+        if(data){
+            let cartProducts = [];
+            data?.cart?.products?.map(item =>{
+                cartProducts.push({...item?.product, quantity: item.quantity});
+            })
+            setCartItems(cartProducts);
+        } 
+
     }
 
     React.useEffect(() => {
         fetchProducts();
+        fetchCart();
     },[])
 
     return (

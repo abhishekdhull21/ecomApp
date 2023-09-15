@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Modal, StyleSheet, TouchableOpacity, FlatList, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Screens from '../screen';
+import request from '../utils/request';
 
 
 const CartBottomSheet = ({ visible, onDismiss, cartItems, setCartItems }) => {
@@ -11,8 +12,15 @@ const CartBottomSheet = ({ visible, onDismiss, cartItems, setCartItems }) => {
         return cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
     };
 
-    const onProceed = () =>{
-        navigation.navigate(Screens.CART_SCREEN)
+    const onProceed = async () =>{
+        const cart = [];
+        cartItems.map((item, i) =>{
+            cart.push({product:item?._id, quantity:item?.quantity});
+        })
+        const res =  await request('carts',{data:cart});
+        if(res){
+            navigation.navigate(Screens.CART_SCREEN);
+        }
     }
 
     const removeFromCart = (productId) => {

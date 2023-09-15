@@ -4,6 +4,8 @@ import { Icon, Button, Badge, Input, Card } from '@rneui/themed';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Screens from '.';
 import { useNavigation } from '@react-navigation/native';
+import request from '../utils/request';
+import AddUserPopup from '../component/Popup';
 
 const renderPaymentOptions = [
   { label: 'Cash', value: 'cash' },
@@ -13,33 +15,14 @@ const renderPaymentOptions = [
   { label: 'Online', value: 'online' },
 ];
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    { id: 2, name: 'Product 2', price: 29.99, quantity:1 },
-    { id: 13, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    { id: 21, name: 'Product 2', price: 29.99, quantity:1 },
-    // { id: 11, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    // { id: 22, name: 'Product 2', price: 29.99, quantity:1 },
-    // { id: 14, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    // { id: 24, name: 'Product 2', price: 29.99, quantity:1 },
-    // { id: 15, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    // { id: 25, name: 'Product 2', price: 29.99, quantity:1 },
-    // { id: 52, name: 'Product 2', price: 29.99, quantity:1 },
-    // { id: 113, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    // { id: 121, name: 'Product 2', price: 29.99, quantity:1 },
-    // { id: 111, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    // { id: 122, name: 'Product 2', price: 29.99, quantity:1 },
-    // { id: 114, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    // { id: 124, name: 'Product 2', price: 29.99, quantity:1 },
-    // { id: 115, name: 'Product 1 name should be like this a bigger', price: 19.99, quantity:1},
-    // { id: 125, name: 'Product 2', price: 29.99, quantity:1 },
-]);
+  const [cartItems, setCartItems] = useState([]);
   const [quantity, setQuantity] = useState(1);
-  const [discount, setDiscount] = useState('');
+  const [discount, setDiscount] = useState(0);
   const [paymentType, setPaymentType] = useState(renderPaymentOptions[0]);
   const [openDropdown, setOpenDropdown] = useState(false)
-const navigation = useNavigation();
-
+  const [isPopupVisible, setPopupVisible] = useState(false);
+  const [user,setUser] = useState({});
+  const navigation = useNavigation();
   
   const addToCart = (product) => {
     const existingItem = cartItems.find((item) => item.id === product.id);
@@ -61,7 +44,7 @@ const navigation = useNavigation();
   };
 
   const removeFromCart = (itemId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+    setCartItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
   };
 
   const updateQuantity = (productId, newQuantity) => {
@@ -69,7 +52,7 @@ const navigation = useNavigation();
     if (newQuantity > 0) {
         setCartItems((prevItems) =>
             prevItems.map((item) =>
-                item.id === productId ? { ...item, quantity: newQuantity } : item
+                item._id === productId ? { ...item, quantity: newQuantity } : item
             )
         );
     } else {
@@ -95,23 +78,56 @@ const navigation = useNavigation();
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.itemName}>
           {item.name}
         </Text>
-        <Text style={styles.itemPrice}>${item.price}</Text>
+        <Text style={styles.itemPrice}>₹{item.price}</Text>
       </View>
       <View style={styles.itemControls}>
         <Button
           icon={<Icon name="remove" size={20} color="white" />}
-          onPress={() => updateQuantity(item.id, item.quantity -1)}
+          onPress={() => updateQuantity(item._id, item.quantity -1)}
           buttonStyle={styles.controlButton}
         />
         <Text style={styles.quantityText}>{item.quantity}</Text>
         <Button
           icon={<Icon name="add" size={20} color="white" />}
-          onPress={() => updateQuantity(item.id, item.quantity + 1)}
+          onPress={() => updateQuantity(item._id, item.quantity + 1)}
           buttonStyle={styles.controlButton}
         />
       </View>
     </View>
   );
+ const fetchCart = async() => {
+      let data = await request('carts',{method: 'GET'});
+      if(data){
+          let cartProducts = [];
+          data?.cart?.products?.map(item =>{
+              cartProducts.push({...item?.product, quantity: item.quantity});
+          })
+          setCartItems(cartProducts);
+      } 
+    }
+  React.useEffect(()=>{
+    fetchCart();  
+  },[]);
+
+  const onProceed = async() => {
+    const productIds = [];
+    cartItems.map(product =>{
+      productIds.push({product:product._id, quantity:product.quantity});
+    })
+    const res = request('orders',{
+      data: {
+        products:productIds,
+        discount:discount,
+        paymentMethod:paymentType,
+        customer:user,
+      }
+    })
+    if(res){
+      Alert.alert("Success","Order created")
+      // navigation.navigate(Screens.ORDER_DETAIL_SCREEN);
+    }
+  }
+
   const inputContainerWidth = Dimensions.get('window').width * 0.4;
 
   return (
@@ -122,17 +138,18 @@ const navigation = useNavigation();
         <>
           <FlatList
             data={cartItems}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item._id?.toString()}
             renderItem={renderItem}
           />
             <Card containerStyle={styles.cardContainer}>
             <View style={styles.row}>
               <Text style={styles.label}>Total Amount:</Text>
-              <Text style={styles.amount}>${calculateTotalAmount()}</Text>
+              <Text style={styles.amount}>₹{calculateTotalAmount()}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Customer:</Text>
-              <Button title={'Select'} />
+              <Text style={styles.labelCustomer}>{user?.name ? user?.name : ''}</Text>
+              <Button title={'Select'} onPress={() => setPopupVisible(true)} />
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Discount:</Text>
@@ -158,14 +175,21 @@ const navigation = useNavigation();
                 />
             <View style={styles.row}>
               <Text style={styles.label}>Final Total:</Text>
-              <Text style={styles.finalTotalAmount}>${calculateFinalTotal()}</Text>
+              <Text style={styles.finalTotalAmount}>₹{calculateFinalTotal()}</Text>
             </View>
 
             <View style={{}}>
-              <Button style={styles.btnProceed} title={'Proceed'} onPress={() => navigation.navigate(Screens.ORDER_DETAIL_SCREEN)} /> 
+              <Button style={styles.btnProceed} title={'Proceed'} onPress={onProceed} /> 
             </View>
 
           </Card>
+          <AddUserPopup
+            isVisible={isPopupVisible}
+            onClose={() => setPopupVisible(false)}
+            onAddUser={(user)=>{
+              setUser(user);
+            }}
+          />
         </>
       )}
     </View>
@@ -262,6 +286,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  labelCustomer: {
+    fontSize: 16,
   },
   amount: {
     fontSize: 16,
