@@ -3,7 +3,7 @@ import { BASE_URL } from "./constant";
 import { getToken } from "./common";
 import {Alert} from 'react-native';
 
-export default request = async (endPoint,{data ={},headers = {},method ="POST"}={},cb)=>{
+export default request = async (endPoint,{data ={},headers = {},method ="POST"}={},showAlertOnError = false)=>{
   const token = await getToken();
   if(token){
     headers["Authorization"] = "Bearer " + token;
@@ -22,7 +22,8 @@ export default request = async (endPoint,{data ={},headers = {},method ="POST"}=
         // if(cb){
         //   return cb(err,null);
         // }
-        Alert.alert("Error",err?.message || err)
-         return  false; 
+        // showAlertOnError && Alert.alert("Error",err?.response?.data.message || err || "Something went wrong")
+        //  return  false; 
+        return Promise.reject(err?.response?.data || false);
         });
 }

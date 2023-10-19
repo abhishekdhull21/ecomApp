@@ -42,7 +42,7 @@ const CartBottomSheet = ({ visible, onDismiss, cartItems, setCartItems }) => {
     };
 
     const renderItem = ({ item: product }) => (
-        <View style={styles.itemContainer}>
+        <View key={product?._id } style={styles.itemContainer}>
             <Text numberOfLines={1} ellipsizeMode="middle" style={{width:150}}>{product.name}</Text>
             <View style={styles.quantityContainer}>
                 <TouchableOpacity

@@ -13,36 +13,42 @@ const Login = () => {
 
   const navigation = useNavigation()
   const handleLogin = async() => {
-    setLoading(true)
+    setLoading(true);
      request("login",{ data:{email,password}}).then( async(res) => {
       if(res.success) {
         await setToken(res.token);
+        resetForm();
         navigation.navigate(Screens.HOME_SCREEN)
-      }else{
-        console.log("Error", res)
-        Alert.alert(
-          "Login failed",res.message
-        )
       }
-      setLoading(false)
+    }).catch(err =>{
+      Alert.alert(
+        "Login failed",err.message
+        )
+      }).finally(()=>{
+       setLoading(false)
      })
   };
 
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+  };
   useEffect(() => {
   let fetchToken = async() =>{
      const token = await getToken();
   if(token) {
+    resetForm();
     navigation.navigate(Screens.HOME_SCREEN)
   }
+}
   fetchToken();
-  }
  
   },[])
   return (
     <View style={styles.container}>
       <Input
-        label="Email"
-        placeholder="Enter your email"
+        label="Email / Mobile"
+        placeholder="Enter your email or mobile"
         labelStyle={styles.label}
         inputContainerStyle={styles.inputContainer}
         inputStyle={styles.input}

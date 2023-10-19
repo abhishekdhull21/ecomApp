@@ -1,9 +1,21 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import Share from 'react-native-share';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import { User } from '../utils/common';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import moment from 'moment';
+import request from '../utils/request';
+import { requestPermission } from '../utils/permission';
+import Screens from '.';
+import TopHeader from '../component/TopHeader';
 
 const OrderDetailScreen = () => {
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { orderId, orderNumber } = route.params;
+  const [deskInfo, setDeskInfo] = useState({});
+  const [order, setOrder] = useState([]);
   const orderDetails = {
     orderNumber: '12345',
     date: '2023-07-17',
@@ -25,12 +37,9 @@ const OrderDetailScreen = () => {
     phone: '+1 123-456-7890',
     // Add more customer details as needed
   };
-  const deskInfo = {
-    name: 'Sales Desk',
-    email: 'sales@example.com',
-    phone: '+1 987-654-3210',
-    // Add more desk details as needed
-  };
+
+
+
 
   const shareOrderDetails = () => {
     const message = 'Your order details go here...';
@@ -39,14 +48,23 @@ const OrderDetailScreen = () => {
       .catch((err) => console.log('Error while sharing:', err));
   };
 
+  const homeHandler = () => {
+    navigation.navigate(Screens.HOME_SCREEN)
+  }
+
   const printOrDownloadInvoice = async () => {
+   let isStorageAccess =  await requestPermission('WRITE_EXTERNAL_STORAGE');
+   if(!isStorageAccess) {
+    Alert.alert('Please provide storage access ',"Need storage access to download the Invoice");
+    return;
+   }
     let itemsHTML = '';
-    orderDetails.items.forEach((item) => {
+    order?.products?.forEach((item) => {
       itemsHTML += `
         <tr>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>${item.price}</td>
+          <td>${item?.product?.name}</td>
+          <td>${item?.quantity}</td>
+          <td>${item?.price}</td>
         </tr>
       `;
     });
@@ -164,48 +182,78 @@ const OrderDetailScreen = () => {
     const pdfPath = pdfFile.filePath;
   };
 
+  const fetchUserInfo = async () => {
+   let user =await User();
+    setDeskInfo(prev => ({
+      ...prev, name: user.fullName,
+      email: user.email,
+      phone: user.mobile,
+    }))
+  };
+
+  const fetchOrder = async() => {
+    if(orderId){
+    let res = await request(`orders/${orderId}`,{method: 'GET'});
+    setOrder(res);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUserInfo();  
+    fetchOrder();
+  }, [])
+
   return (
-    <View style={styles.container}>
-    <View style={styles.orderContainer}>
-      {/* Render order details here */}
-      <Text style={styles.orderText}>Order Number: {orderDetails.orderNumber}</Text>
-      <Text style={styles.orderText}>Order Date: {orderDate}</Text>
+    <>
+    <TopHeader />
+    <ScrollView style={styles.container}>
+      <View style={styles.orderContainer}>
+        {/* Render order details here */}
+        <Text style={styles.orderText}>Order Number: {order?.orderNumber}</Text>
+        <Text style={styles.orderText}>Order Date: {moment(order?.createdAt).toLocaleString()}</Text>
+        {/* Customer Information */}
+        <Text style={styles.heading}>Customer Information:</Text>
+        <Text>Name: {order?.customer?.name} {order?.customer?.lastName}</Text>
+        {order?.customer?.address && <Text>Address: {order?.customer?.address}</Text>}
+        {order?.customer?.email && <Text>Email: {order?.customer?.email}</Text>}
+        <Text>Phone: {order?.customer?.mobile}</Text>
 
-      {/* Customer Information */}
-      <Text style={styles.heading}>Customer Information:</Text>
-      <Text>Name: {customerInfo.name}</Text>
-      <Text>Address: {customerInfo.address}</Text>
-      <Text>Email: {customerInfo.email}</Text>
-      <Text>Phone: {customerInfo.phone}</Text>
+        {/* Desk Information */}
+        <Text style={styles.heading}>Desk Information:</Text>
+        <Text>Name: {deskInfo.name}</Text>
+        <Text>Email: {deskInfo.email}</Text>
+        <Text>Phone: {deskInfo.phone}</Text>
 
-      {/* Desk Information */}
-      <Text style={styles.heading}>Desk Information:</Text>
-      <Text>Name: {deskInfo.name}</Text>
-      <Text>Email: {deskInfo.email}</Text>
-      <Text>Phone: {deskInfo.phone}</Text>
+        {/* Render items */}
+        <Text style={styles.heading}>Items:</Text>
+        {order?.products?.map((item, index) => (
+          <View key={index} style={styles.itemContainer}>
+            <Text style={styles.itemName}>{item?.product?.name}</Text>
+            <Text style={styles.itemInfo}>Quantity: {item.quantity}</Text>
+            <Text style={styles.itemInfo}>Price: ₹{(item.price ||0).toFixed(2)}</Text>
+          </View>
+        ))}
+        {/* Add more order details */}
+        <Text style={styles.total}>Amount: ₹{(order?.totalAmount || 0).toFixed(2)}</Text>
+        <Text style={styles.total}>Discount: ₹{(order?.discount || 0).toFixed(2)}</Text>
+        <Text style={styles.total}> Total: ₹{(order?.finalAmount || 0).toFixed(2)}</Text>
+      </View>
 
-      {/* Render items */}
-      <Text style={styles.heading}>Items:</Text>
-      {orderDetails.items.map((item, index) => (
-        <View key={index} style={styles.itemContainer}>
-          <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemInfo}>Quantity: {item.quantity}</Text>
-          <Text style={styles.itemInfo}>Price: {item.price}</Text>
-        </View>
-      ))}
-      {/* Add more order details */}
-      <Text style={styles.total}>Total: {orderDetails.total}</Text>
-    </View>
-
-    <View style={styles.buttonsContainer}>
-      <TouchableOpacity style={styles.button} onPress={shareOrderDetails}>
-        <Text style={styles.buttonText}>Share on WhatsApp</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={printOrDownloadInvoice}>
-        <Text style={styles.buttonText}>Print/Download Invoice</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
+      {/* <View style={styles.buttonsContainer}>
+        <TouchableOpacity style={styles.button} onPress={shareOrderDetails}>
+          <Text style={styles.buttonText}>Share on WhatsApp</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={printOrDownloadInvoice}>
+          <Text style={styles.buttonText}>Print/Download Invoice</Text>
+        </TouchableOpacity>
+      </View> */}
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity style={styles.fullButton} onPress={homeHandler}>
+          <Text style={styles.buttonText}>Home</Text>
+          </TouchableOpacity>
+      </View>
+    </ScrollView>
+    </>
   );
 };
 
@@ -248,12 +296,19 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    marginTop:24
   },
   button: {
     backgroundColor: '#007bff',
     padding: 12,
     borderRadius: 8,
     width: '48%',
+  },
+  fullButton: {
+    backgroundColor: '#007bff',
+    padding: 12,
+    borderRadius: 8,
+    width: '90%',
   },
   buttonText: {
     color: '#ffffff',

@@ -1,26 +1,13 @@
 import { useNavigation } from '@react-navigation/native';
 import { Button } from '@rneui/themed';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList,ScrollView,ActivityIndicator } from 'react-native';
 import Collapsible from 'react-native-collapsible';
 import Screens from '../screen';
+import request from '../utils/request';
+import moment from 'moment';
 
 
-
-const DATA = [
-  {
-    id: '1',
-    date: '2023-07-19',
-    amount: 100,
-    products: ['Product A', 'Product B'],
-  },
-  {
-    id: '2',
-    date: '2023-07-18',
-    amount: 150,
-    products: ['Product C', 'Product D'],
-  },
-];
 
 const FILTER_OPTIONS = [
   'Today',
@@ -33,9 +20,10 @@ const FILTER_OPTIONS = [
 ];
 
 const OrderList = () => {
+  const [ pageLoading,setPageLoading] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('Today');
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [orders, setOrders] = useState(DATA);
+  const [orders, setOrders] = useState([]);
   const [activeOrderDropdown, setActiveOrderDropdown] = useState(0);
 
   const navigation  = useNavigation()
@@ -71,18 +59,33 @@ const OrderList = () => {
   );
 
 
-  const accordionSections = orders.map((order) => ({
-    title: order.id,
+  const accordionSections =   orders.map((order) => ({
+    title: order.id || order._id,
+    orderId: order.id || order._id,
     content: (
       <View style={styles.productList}>
-        {order.products.map((product, index) => (
-          <View key={index} style={styles.productItem}>
-            <Text style={styles.productName}>{product}</Text>
+        {order?.products?.map((item, index) => (
+          <View key={index} style={[styles.productItem, styles.row]}>
+            <Text style={styles.productName}>{item?.product?.name || `Product - ${index+1}`}</Text>
+            <Text style={styles.productName}>₹{item?.totalAmount || `₹00.00`}</Text>
           </View>
         ))}
       </View>
     ),
   }));
+
+  const fetchOrder = async() => {
+    setPageLoading(true);
+   let res =  await request(`orders?time=${selectedFilter}`,{
+      method: "GET",
+    });
+    setOrders(res || []);
+    setPageLoading(false);
+  }
+  React.useEffect(()=>{
+   fetchOrder();
+
+  },[selectedFilter]);
 
   return (
     <View style={styles.container}>
@@ -95,29 +98,33 @@ const OrderList = () => {
         contentContainerStyle={styles.filterContainer}
         showsHorizontalScrollIndicator={false}
       />
-      
-      {accordionSections.map(({ title, content }, index) => (
-        <>
-         <TouchableOpacity onPress={() => handleOrderSelect(title,index)}>
+      <ScrollView>
+      {pageLoading ? (<ActivityIndicator />):
+      (accordionSections.length ? accordionSections.map(({  orderId, content }, index) => (
+        <View key={index}>
+         <TouchableOpacity  onPress={() => handleOrderSelect(orderId,index)}>
           <View style={styles.orderItem}>
-            <Text style={styles.orderDate}>{orders.find((order) => order.id === title)?.date}</Text>
+            <Text style={styles.orderDate}>{moment(orders.find( order => (order._id || order.id) === orderId)?.createdAt).fromNow()}</Text>
             <Text style={styles.orderAmount}>
-              Amount: ${orders.find((order) => order.id === title)?.amount}
+              ₹{orders.find((order) => (order._id || order.id) === orderId)?.finalAmount?.toFixed(2)}
             </Text>
           </View>
         </TouchableOpacity>
           <Collapsible collapsed={activeOrderDropdown !== index}>
-            <View key={title}>
+            <View key={orderId}>
               {content}
-              <TouchableOpacity onPress={() => handleOrderSelect(title,index)}>
-          <View style={styles.orderItem}>
-              <Button onPress={() => navigation.navigate(Screens.CART_SCREEN) } >View</Button>
+              <TouchableOpacity onPress={() => handleOrderSelect(orderId,index)}>
+          <View style={[styles.orderItem, styles.rightContent]}>
+              <Button onPress={() => navigation.navigate(Screens.ORDER_DETAIL_SCREEN,{orderId}) } >Invoice</Button>
           </View>
         </TouchableOpacity>
             </View>
           </Collapsible>
-        </>
-      ))}
+        </View>
+      )) :(<View style={styles.centerContent} ><Text >No Order</Text></View>)
+      )
+      }
+      </ScrollView>
     </View>
   );
 };
@@ -180,6 +187,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'black',
   },
+  centerContent:{
+    flex:1,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignSelf:'center'
+  },
+  rightContent:{
+    flex:1,
+    alignSelf:'flex-end'
+  },
+  row:{
+    flex:1,
+    direction: 'column',
+  }
+
 });
 
 export default OrderList;

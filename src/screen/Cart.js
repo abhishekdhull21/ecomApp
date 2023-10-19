@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, FlatList, Alert, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, FlatList, Alert, Dimensions,ActivityIndicator } from 'react-native';
 import { Icon, Button, Badge, Input, Card } from '@rneui/themed';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Screens from '.';
@@ -22,6 +22,7 @@ const Cart = () => {
   const [openDropdown, setOpenDropdown] = useState(false)
   const [isPopupVisible, setPopupVisible] = useState(false);
   const [user,setUser] = useState({});
+  const [ pageLoading,setPageLoading] = useState(false);
   const navigation = useNavigation();
   
   const addToCart = (product) => {
@@ -96,6 +97,7 @@ const Cart = () => {
     </View>
   );
  const fetchCart = async() => {
+      setPageLoading(true);
       let data = await request('carts',{method: 'GET'});
       if(data){
           let cartProducts = [];
@@ -104,7 +106,18 @@ const Cart = () => {
           })
           setCartItems(cartProducts);
       } 
+      setPageLoading(false);
+  }
+
+  const onDiscount = (discount) => {
+    const totalAmount = calculateTotalAmount();
+    if(Number(discount) < Number(totalAmount)) {
+      setDiscount(discount);
+    }else{
+      Alert.alert("Discount should be less than total amount");
     }
+  }
+
   React.useEffect(()=>{
     fetchCart();  
   },[]);
@@ -114,16 +127,23 @@ const Cart = () => {
     cartItems.map(product =>{
       productIds.push({product:product._id, quantity:product.quantity});
     })
-    const res = request('orders',{
+    const res = request(`orders`,{
       data: {
         products:productIds,
         discount:discount,
         paymentMethod:paymentType,
-        customer:user,
+        customer:user._id,
       }
     })
     if(res){
-      Alert.alert("Success","Order created")
+      let resOrder = res.order;
+      Alert.alert("Success","Order created",[ {
+        text: 'Invoice',
+        onPress: () => navigation.navigate(Screens.ORDER_DETAIL_SCREEN,{orderId:resOrder?._id || resOrder?.id,orderNumber: resOrder?.orderNumber}),
+      },{
+        text: 'Home',
+        onPress: () => navigation.navigate(Screens.HOME_SCREEN),
+      },]);
       // navigation.navigate(Screens.ORDER_DETAIL_SCREEN);
     }
   }
@@ -133,7 +153,7 @@ const Cart = () => {
   return (
     <View style={styles.container}>
       {cartItems.length === 0 ? (
-        <Text style={styles.emptyCartText}>Your cart is empty.</Text>
+       pageLoading ? <ActivityIndicator /> : <Text style={styles.emptyCartText}>Your cart is empty.</Text>
       ) : (
         <>
           <FlatList
@@ -157,7 +177,7 @@ const Cart = () => {
                 placeholder="Enter discount amount"
                 keyboardType="numeric"
                 value={discount}
-                onChangeText={setDiscount}
+                onChangeText={onDiscount}
                 containerStyle={styles.inputContainer}
                 inputStyle={styles.input}
               />

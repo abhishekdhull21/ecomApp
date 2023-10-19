@@ -7,32 +7,41 @@ const AddUserPopup = ({ isVisible, onClose, onAddUser }) => {
   const [number, setNumber] = useState('');
   const [address, setAddress] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
     // Validate inputs here
-    // if (!name || !number) {
-    //   // Handle validation error
-    //   return;
-    // }
+    if (!name || !number) {
+      // Handle validation error
+      return;
+    }
 
     // Create a new user object
     const newUser = {
       name,
-      number: number,
-      email: address,
+      mobile: number,
+      address: address,
     };
 
-    // Call a function to add the new user to your data source
-    onAddUser(newUser);
-
-    // Clear the form inputs
-    
-    // setName('');
-    // setEmail('');
-    // setPassword('');
-
-    // Close the popup
-    onClose();
+    let res =  await request("users/addCustomer",{data: newUser});
+    if(res || res.success) {
+        onAddUser(res.data);
+        onClose();
+    }else{
+        Alert.alert("Error","Failed to add customer"+res)
+    }
   };
+
+  const handleNumberChange = async(no) =>{
+    setNumber(no);
+    if(no.length !== 10) return;
+    let res =  await request(`users/search/mobile?q=${no}`,{method:'GET'});
+    if(res || res.success) {
+        setName(res?.name);
+        onAddUser(res);
+        onClose();
+    }else{
+        Alert.alert("Error","Failed to fetch customer"+res)
+    }
+  }
 
   return (
     <Modal
@@ -51,7 +60,7 @@ const AddUserPopup = ({ isVisible, onClose, onAddUser }) => {
         <TextInput
             placeholder="Mobile No."
             value={number}
-            onChangeText={(text) => setNumber(text)}
+            onChangeText={handleNumberChange}
             style={styles.input}
           />
           <TextInput
